@@ -33,9 +33,14 @@ int main(int argc, char** argv ){
     waitKey(0);*/
 
     std::vector<std::string> datanames = getFiles(DATAPATH);
+    std::vector<ImageObject> DpObjects;
+    DpObjects = assignObject(datanames);
+
+    std::cout << DpObjects.size() << std::endl;
+    std::cout << datanames.size() << std::endl;
 
     
-        
+
 
 
     
@@ -61,18 +66,27 @@ std::vector<ImageObject> assignObject(std::vector<std::string> names){
                 if (j.find(tmpname) && !j.find(".txt")){
                     ImageObject it{imgtxt, i, j};
                     objects.push_back(it);
-                    delete &it;
+                    it.~ImageObject();
                 }
                 if (!(j.find(tmpname) && !j.find(".txt"))){
                     ImageObject jt{txt, i};
                     objects.push_back(jt);
-                    delete &jt;
+                    jt.~ImageObject();
                 }
             }
         }
         if(!i.find(".txt")){
-            
+            tmpname = i;
+            std::string::iterator x = tmpname.end() - tmpname.find('x');
+            tmpname.erase(x, tmpname.end());
+            for(auto j : names){
+                if (j.find(tmpname) && j.find(".txt")){
+                    ImageObject ji{img, i};
+                   objects.push_back(ji);
+                    ji.~ImageObject();
+                }
+            }
         }
-
     }
+    return objects;
 }
