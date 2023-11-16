@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "DisplayImage.hpp"
+#include "ImageObject.hpp"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -8,7 +9,6 @@ using namespace cv;
 
 #define DATAPATH "./data/"
 
-std::vector<std::string> removeJustTxt(std::vector<std::string> files);
 
 int main(int argc, char** argv ){
     /*if ( argc != 2 )
@@ -32,42 +32,47 @@ int main(int argc, char** argv ){
 
     waitKey(0);*/
 
-    std::vector<std::string> datanames = getFiles();
-    datanames = removeJustTxt(datanames);
+    std::vector<std::string> datanames = getFiles(DATAPATH);
 
-    for(auto i : datanames) 
-        std::cout << i << std::endl;
+    
+        
+
+
     
     return 0;
 }
 
-std::vector<std::string> getFiles(){
+std::vector<std::string> getFiles(std::string apath){
     std::vector<std::string> files;
-    std::string path = DATAPATH;
+    std::string path = apath;
     for (const auto & entry : fs::directory_iterator(path))
         files.push_back(entry.path());
     return files;
 }
 
-std::vector<std::string> removeJustTxt(std::vector<std::string> files){
-    std::vector<std::string> newfiles;
-    std::string tmpFN;
-    for (auto i : files){
-        if (i.find(".txt")== !std::string::npos){
-            tmpFN = i;
-            tmpFN.erase((i.size() - 5), std::string::npos);
-            std::cout << std::endl << tmpFN << std::endl;
-            tmpFN.append(".jpeg");
-            for(auto j : files){
-                if (!j.compare(tmpFN))
-                {
-                    goto RTEXIT;                                            //I know, shut up!
+std::vector<ImageObject> assignObject(std::vector<std::string> names){
+    std::vector<ImageObject> objects;
+    std::string tmpname;
+    for(auto i : names){
+        if(i.find(".txt")){
+            tmpname = i;
+            tmpname.erase(tmpname.end() - 4, tmpname.end());
+            for(auto j : names){
+                if (j.find(tmpname) && !j.find(".txt")){
+                    ImageObject it{imgtxt, i, j};
+                    objects.push_back(it);
+                    delete &it;
+                }
+                if (!(j.find(tmpname) && !j.find(".txt"))){
+                    ImageObject jt{txt, i};
+                    objects.push_back(jt);
+                    delete &jt;
                 }
             }
-            break;
         }
-        RTEXIT:
-        newfiles.push_back(i);        
+        if(!i.find(".txt")){
+            
+        }
+
     }
-    return newfiles;
 }

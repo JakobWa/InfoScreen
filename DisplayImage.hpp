@@ -5,10 +5,10 @@
 
 #include <string>
 #include <vector>
+#include "ImageObject.hpp"
 
-std::vector<std::string> getFiles();
-std::vector<std::string> removeJustTxt(std::vector<std::string> files);
-
+std::vector<std::string> getFiles(std::string apath);
+std::vector<ImageObject> assignObject(std::vector<std::string> names);
 
 
 
