@@ -36,14 +36,7 @@ int main(int argc, char** argv ){
     std::vector<ImageObject> DpObjects;
     DpObjects = assignObject(datanames);
 
-    std::cout << DpObjects.size() << std::endl;
-    std::cout << datanames.size() << std::endl;
 
-    
-
-
-
-    
     return 0;
 }
 
@@ -59,31 +52,33 @@ std::vector<ImageObject> assignObject(std::vector<std::string> names){
     std::vector<ImageObject> objects;
     std::string tmpname;
     for(auto i : names){
-        if(i.find(".txt")){
+        if(i.find(".txt") != std::string::npos){ // if ".txt" is found in string
             tmpname = i;
             tmpname.erase(tmpname.end() - 4, tmpname.end());
             for(auto j : names){
-                if (j.find(tmpname) && !j.find(".txt")){
+                if ((j.find(tmpname) != std::string::npos ) && (j.find(".txt") == std::string::npos)){ // if a file with the same name but different suffix is found
                     ImageObject it{imgtxt, i, j};
                     objects.push_back(it);
                     it.~ImageObject();
+                    break;
                 }
-                if (!(j.find(tmpname) && !j.find(".txt"))){
+                if (((j.find(tmpname) != std::string::npos) && (j.find(".txt") == std::string::npos))){ // if no file with the same name is found
                     ImageObject jt{txt, i};
                     objects.push_back(jt);
                     jt.~ImageObject();
+                    break;
                 }
             }
         }
-        if(!i.find(".txt")){
+        if(i.find(".txt") == std::string::npos){ // if ".txt" is not found in filename
             tmpname = i;
-            std::string::iterator x = tmpname.end() - tmpname.find('x');
-            tmpname.erase(x, tmpname.end());
+            tmpname.erase((tmpname.begin() + tmpname.find_last_of('.')), tmpname.end());
             for(auto j : names){
-                if (j.find(tmpname) && j.find(".txt")){
+                if (!((j.find(tmpname) != std::string::npos ) && (j.find(".txt") != std::string::npos))){
                     ImageObject ji{img, i};
-                   objects.push_back(ji);
+                    objects.push_back(ji);
                     ji.~ImageObject();
+                    break;
                 }
             }
         }
