@@ -1,11 +1,10 @@
 /.vscode
 /build
 /CMakeFiles
-/data
+/data/*
 /output
 *.cmake
 *.out 
 Makefile 
-*.txt
 DisplayImage
-
+CMakeCache.txt
