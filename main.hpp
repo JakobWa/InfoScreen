@@ -1,5 +1,5 @@
-#ifndef DisplayImage_HPP
-#define DisplayImage_HPP
+#ifndef MAIN_HPP
+#define MAIN_HPP
 
 #pragma once
 
@@ -20,5 +20,7 @@ std::vector<std::string> getFiles(std::string apath);
 *@return vector of ImageObjects
 */
 std::vector<ImageObject> assignObject(std::vector<std::string> names);
+
+void displayImage(ImageObject obj);
 
 #endif

@@ -1,14 +1,12 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "DisplayImage.hpp"
+#include "main.hpp"
 #include "ImageObject.hpp"
 #include <filesystem>
+#include "settings.h"
 
 namespace fs = std::filesystem;
 using namespace cv;
-
-#define DATAPATH "./data/"
-
 
 int main(int argc, char** argv ){
     /*if ( argc != 2 )
@@ -36,6 +34,11 @@ int main(int argc, char** argv ){
     std::vector<ImageObject> DpObjects;
     DpObjects = assignObject(datanames);
 
+    for(auto i : DpObjects){
+        displayImage(i);
+        waitKey(0);
+    }
+
 
     return 0;
 }
@@ -59,13 +62,11 @@ std::vector<ImageObject> assignObject(std::vector<std::string> names){
                 if ((j.find(tmpname) != std::string::npos ) && (j.find(".txt") == std::string::npos)){ // if a file with the same name but different suffix is found
                     ImageObject it{imgtxt, i, j};
                     objects.push_back(it);
-                    it.~ImageObject();
                     break;
                 }
                 if (((j.find(tmpname) != std::string::npos) && (j.find(".txt") == std::string::npos))){ // if no file with the same name is found
                     ImageObject jt{txt, i};
                     objects.push_back(jt);
-                    jt.~ImageObject();
                     break;
                 }
             }
@@ -77,11 +78,30 @@ std::vector<ImageObject> assignObject(std::vector<std::string> names){
                 if (!((j.find(tmpname) != std::string::npos ) && (j.find(".txt") != std::string::npos))){
                     ImageObject ji{img, i};
                     objects.push_back(ji);
-                    ji.~ImageObject();
                     break;
                 }
             }
         }
     }
     return objects;
+}
+
+void displayImage(ImageObject obj){
+    switch (obj.getmode()){
+    case img:{
+        Mat image;
+        image = imread(obj.getimgName(), IMREAD_COLOR );
+        if ( !image.data )
+        {
+            printf("No image data \n");
+            return;
+        }
+        namedWindow("Display Image", WINDOW_AUTOSIZE );
+        imshow("Display Image", image);
+        break;
+    }
+    default:
+        break;
+    }
+
 }
