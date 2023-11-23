@@ -4,8 +4,7 @@
 /data/*
 /output
 *.cmake
-*.out 
+/media/JakobW/Volume/Vscode/C++/FF/InfoScreen
 Makefile 
 DisplayImage
 CMakeCache.txt
-*InfoScreen*

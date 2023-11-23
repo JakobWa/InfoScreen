@@ -5,7 +5,10 @@
 
 #include <string>
 #include <vector>
+#include <opencv2/opencv.hpp>
 #include "ImageObject.hpp"
+
+using namespace cv;
 
 /*This function iterates through a folder an returns a list of the files inside
 *@param string with the name of the folder of the files
@@ -21,6 +24,20 @@ std::vector<std::string> getFiles(std::string apath);
 */
 std::vector<ImageObject> assignObject(std::vector<std::string> names);
 
+/*Resizes the given image to the Screensize provided in settings.h
+*@param Mat image object
+*@return Mat image object
+*/
+Mat resizeToFull(Mat img);
+
+Mat centerOnBlack(Mat img);
+
+/*Takes an image and prints it to the screen
+*@param ImageObject with image and/or textpath
+*@retun nothing
+*/
 void displayImage(ImageObject obj);
+
+std::string readText(std::string txtpath);
 
 #endif
