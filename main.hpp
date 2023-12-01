@@ -8,7 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include "ImageObject.hpp"
 
-using namespace cv;
+using cv::Mat;
 
 /*This function iterates through a folder an returns a list of the files inside
 *@param string with the name of the folder of the files
@@ -32,12 +32,19 @@ Mat resizeToFull(Mat img);
 
 Mat centerOnBlack(Mat img);
 
+Mat printTextOnImage(const std::string& text, cv::Mat& image, int ystart);
+
+std::vector<std::string> readText(std::string txtpath);
+
+Mat insertLogo(Mat img, Mat logo);
+
+Mat bottomText(Mat img, std::vector<std::string> txt);
+
 /*Takes an image and prints it to the screen
 *@param ImageObject with image and/or textpath
 *@retun nothing
 */
 void displayImage(ImageObject obj);
 
-std::string readText(std::string txtpath);
 
 #endif

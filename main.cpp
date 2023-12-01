@@ -1,37 +1,24 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "main.hpp"
-#include "ImageObject.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <filesystem>
-#include "settings.h"
 #include <chrono>
 #include <fstream>
+#include <sstream>
+#include <unistd.h>
 
-namespace fs = filesystem;
+#include "main.hpp"
+#include "ImageObject.hpp"
+#include "settings.h"
+
+#define US 1000000
+
+namespace fs = std::filesystem;
 using namespace cv;
-using namespace std;
+using std::vector, std::string, std::cout;
 
 int main(int argc, char** argv ){
-    /*if ( argc != 2 )
-    {
-        cout << "usage: DisplayImage.out <tetst.jpeg>\n";
-        return -1;
-    }
-    Mat image;
-    image = imread( argv[1], IMREAD_COLOR );
-    if ( !image.data )
-    {
-        printf("No image data \n");
-        return -1;
-    }
-    namedWindow("Display Image", WINDOW_AUTOSIZE );
-    imshow("Display Image", image);
-
-    string path = DATAPATH;
-    for (const auto & entry : fs::directory_iterator(path))
-        cout << entry.path() << endl;
-
-    waitKey(0);*/
     while(1){
         vector<string> datanames = getFiles(DATAPATH);
         vector<ImageObject> DpObjects;
@@ -43,6 +30,7 @@ int main(int argc, char** argv ){
                 return 0;
         }
     }
+    
     return 0;
 }
 
@@ -67,7 +55,7 @@ vector<ImageObject> assignObject(vector<string> names){
                     objects.push_back(it);
                     break;
                 }
-                if (((j.find(tmpname) != string::npos) && (j.find(".txt") == string::npos))){ // if no file with the same name is found
+                if (((j.find(tmpname) != string::npos) && (j.find(".txt") != string::npos))){ // if no file with the same name is found
                     ImageObject jt{txt, i};
                     objects.push_back(jt);
                     break;
@@ -111,16 +99,48 @@ Mat centerOnBlack(Mat img){
     return blackBackground;
 }
 
-string readText(string txtpath){
+vector<string> readText(string txtpath){
     ifstream file(txtpath);
     if (!file.is_open()) {
         cerr << "Error: Could not open the text file." << endl;
     }
-    string text;
-    getline(file, text);
+    string buf;
+    vector<string> text;
+
+    while(getline(file, buf)){
+        text.push_back(buf);
+    }
     file.close();
     return text;
 }
+
+Mat printTextOnImage(const vector<string> text, cv::Mat& image, int ystart){
+    // Font settings
+    int fontFace = cv::FONT_HERSHEY_SIMPLEX;
+    double fontScale = 1.0;
+    int thickness = 2;
+    Scalar color(0,0,0);
+    Point pos(20, ystart);
+
+    for(auto i : text){
+        putText(image, i, pos, fontFace, fontScale, color, thickness);
+        pos.y += 30;
+    } 
+    return image;
+
+    //TODO: deal with too long lines, and too many lines
+
+}
+
+Mat insertLogo(Mat img, Mat logo){
+    int xOffset = (SCREEN_WIDTH - logo.cols); // Calculate the position to center the image
+    int yOffset = (SCREEN_HEIGHT - logo.rows);
+    Mat roi = img(Rect(xOffset, yOffset, logo.cols, logo.rows)); // Copy the image onto the black background at the calculated position
+    logo.copyTo(roi);
+    return img;
+    
+}
+
 
 void displayImage(ImageObject obj){
     switch (obj.getmode()){
@@ -129,6 +149,7 @@ void displayImage(ImageObject obj){
         image = imread(obj.getimgName(), IMREAD_COLOR );
         if (!image.data){
             printf("No image data \n");
+            return;
         }
         namedWindow("Image", WINDOW_AUTOSIZE);
         setWindowProperty("Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
@@ -139,26 +160,50 @@ void displayImage(ImageObject obj){
         break;
     }
     case txt:{
-        string text = readText(obj.gettxtName());
+        vector<string> text = readText(obj.gettxtName());
+
 
         Mat whiteBackground(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255));
-        int fontFace = FONT_HERSHEY_SIMPLEX;
-        double fontScale = 2.0;
-        int thickness = 2;
-        int baseline = 0;
-        Size textSize = getTextSize(text, fontFace, fontScale, thickness, &baseline);
 
-        Point textPosition((SCREEN_WIDTH - textSize.width) / 2, (SCREEN_HEIGHT + textSize.height) / 2);
+        Mat logo;
+        logo = imread("logo.png", IMREAD_COLOR);
+        if (!logo.data){
+            printf("No image data \n");
+            return;
+        }
+        whiteBackground = insertLogo(whiteBackground, logo);
 
-        putText(whiteBackground, text, textPosition, fontFace, fontScale, Scalar(0, 0, 0), thickness);
+        whiteBackground = printTextOnImage(text, whiteBackground, 20);
 
-        namedWindow("Text on White Background", WINDOW_NORMAL);
-        setWindowProperty("Text on White Background", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
-        imshow("Text on White Background", whiteBackground);
+        namedWindow("Image", WINDOW_NORMAL);
+        setWindowProperty("Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+        imshow("Image", whiteBackground);
         break;
+    }
+    case imgtxt:{
+        vector<string> text = readText(obj.gettxtName());
+        Mat image;
+        image = imread(obj.getimgName(), IMREAD_COLOR );
+        if (!image.data){
+            printf("No image data \n");
+            return;
+        }
+        namedWindow("Image", WINDOW_AUTOSIZE);
+        setWindowProperty("Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+        image = resizeToFull(image);
+        if((image.cols != SCREEN_WIDTH) || (image.rows != SCREEN_HEIGHT))
+            image = centerOnBlack(image);    
+
+        Mat txtbkrd(30 * text.size(), SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255));
+        Mat roi = image(Rect(0, (SCREEN_HEIGHT - (30 * text.size())), SCREEN_WIDTH, (30 * text.size()))); //?
+        txtbkrd.copyTo(roi);
+        image = printTextOnImage(text, image, (SCREEN_HEIGHT - (30 * text.size())));
+
+        imshow("Image", image);
+
+
     }
     default:
         break;
     }
-    return;
 }

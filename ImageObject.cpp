@@ -1,5 +1,6 @@
-#include "ImageObject.hpp"
 #include <iostream>
+
+#include "ImageObject.hpp"
 
 ImObjMode ImageObject::getmode(){
     return mode;
