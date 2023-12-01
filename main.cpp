@@ -45,6 +45,7 @@ vector<string> getFiles(string apath){
 vector<ImageObject> assignObject(vector<string> names){
     vector<ImageObject> objects;
     string tmpname;
+    bool flag = true;
     for(auto i : names){
         if(i.find(".txt") != string::npos){ // if ".txt" is found in string
             tmpname = i;
@@ -65,12 +66,17 @@ vector<ImageObject> assignObject(vector<string> names){
         if(i.find(".txt") == string::npos){ // if ".txt" is not found in filename
             tmpname = i;
             tmpname.erase((tmpname.begin() + tmpname.find_last_of('.')), tmpname.end());
+            string compn = tmpname + ".txt";
+
             for(auto j : names){
-                if (!((j.find(tmpname) != string::npos ) && (j.find(".txt") != string::npos))){
-                    ImageObject ji{img, i};
-                    objects.push_back(ji);
+                if (j.compare(compn) == 0){
+                    flag = false;
                     break;
                 }
+            }
+            if(flag){
+            ImageObject ji{img, i};
+            objects.push_back(ji);
             }
         }
     }
@@ -194,8 +200,8 @@ void displayImage(ImageObject obj){
         if((image.cols != SCREEN_WIDTH) || (image.rows != SCREEN_HEIGHT))
             image = centerOnBlack(image);    
 
-        Mat txtbkrd(30 * text.size(), SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255));
-        Mat roi = image(Rect(0, (SCREEN_HEIGHT - (30 * text.size())), SCREEN_WIDTH, (30 * text.size()))); //?
+        Mat txtbkrd(30 * (text.size() + 1), SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255)); //TODO: Make image transparent
+        Mat roi = image(Rect(0, (SCREEN_HEIGHT - (30 * (text.size() + 1))), SCREEN_WIDTH, (30 * (text.size() + 1)))); //?
         txtbkrd.copyTo(roi);
         image = printTextOnImage(text, image, (SCREEN_HEIGHT - (30 * text.size())));
 

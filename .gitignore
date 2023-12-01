@@ -6,5 +6,5 @@
 *.cmake
 /media/JakobW/Volume/Vscode/C++/FF/InfoScreen
 Makefile 
-DisplayImage
+InfoScreen
 CMakeCache.txt
