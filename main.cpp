@@ -3,10 +3,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <filesystem>
-#include <chrono>
+#include <ctime>
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
+#include <thread>
 
 #include "main.hpp"
 #include "ImageObject.hpp"
@@ -16,7 +17,7 @@
 
 namespace fs = std::filesystem;
 using namespace cv;
-using std::vector, std::string, std::cout;
+using std::vector, std::string, std::cout, std::thread;
 
 int main(int argc, char** argv ){
     while(1){
@@ -26,11 +27,10 @@ int main(int argc, char** argv ){
 
         for(auto i : DpObjects){
             displayImage(i);
-            if(waitKey(0) == 'x')
-                return 0;
+            thread t1(waitKey, 0);
+            t1.join();
         }
     }
-    
     return 0;
 }
 
@@ -137,6 +137,11 @@ Mat printTextOnImage(const vector<string> text, cv::Mat& image, int ystart){
     //TODO: deal with too long lines, and too many lines
 
 }
+
+void sleepForMilliseconds(int milliseconds) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
 
 Mat insertLogo(Mat img, Mat logo){
     int xOffset = (SCREEN_WIDTH - logo.cols); // Calculate the position to center the image

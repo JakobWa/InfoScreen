@@ -40,6 +40,8 @@ Mat insertLogo(Mat img, Mat logo);
 
 Mat bottomText(Mat img, std::vector<std::string> txt);
 
+void sleepForMilliseconds(int milliseconds);
+
 /*Takes an image and prints it to the screen
 *@param ImageObject with image and/or textpath
 *@retun nothing
