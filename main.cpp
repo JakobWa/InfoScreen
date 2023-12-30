@@ -19,16 +19,16 @@ namespace fs = std::filesystem;
 using namespace cv;
 using std::vector, std::string, std::cout, std::thread;
 
-int main(int argc, char** argv ){
+int main(){
     while(1){
         vector<string> datanames = getFiles(DATAPATH);
         vector<ImageObject> DpObjects;
         DpObjects = assignObject(datanames);
-
+        cout << "Size: " << DpObjects.size() << std::endl;
         for(auto i : DpObjects){
+            cout << "Mode: " << i.getmode() << std::endl;
             displayImage(i);
-            thread t1(waitKey, 0);
-            t1.join();
+            waitKey(0);
         }
     }
     return 0;
@@ -43,6 +43,8 @@ vector<string> getFiles(string apath){
 }
 
 vector<ImageObject> assignObject(vector<string> names){
+    
+
     vector<ImageObject> objects;
     string tmpname;
     bool flag = true;
