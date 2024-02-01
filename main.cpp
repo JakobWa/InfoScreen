@@ -1,3 +1,12 @@
+//+-------------------------------------------------------------------------
+//
+//  InfoScreen
+//  Copyright (C) 2024 Jakob Wallner
+//
+//  File:       main.cpp
+//
+//--------------------------------------------------------------------------
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -186,7 +195,7 @@ void displayImage(ImageObject obj){
         }
         whiteBackground = insertLogo(whiteBackground, logo);
 
-        whiteBackground = printTextOnImage(text, whiteBackground, 20);
+        whiteBackground = printTextOnImage(text, whiteBackground, 25);
 
         namedWindow("Image", WINDOW_NORMAL);
         setWindowProperty("Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);

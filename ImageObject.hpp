@@ -1,3 +1,12 @@
+//+-------------------------------------------------------------------------
+//
+//  InfoScreen
+//  Copyright (C) 2024 Jakob Wallner
+//
+//  File:       ImageObject.hpp
+//
+//--------------------------------------------------------------------------
+
 #ifndef IMAGEOBJECT_HPP
 #define IMAGEOBJECT_HPP
 
