@@ -16,28 +16,25 @@
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
-#include <thread>
 
-#include "main.hpp"
-#include "ImageObject.hpp"
-#include "settings.h"
-
-#define US 1000000
+#include "../lib/main.hpp"
+#include "../lib/ImageObject.hpp"
+#include "../set/settings.h"
 
 namespace fs = std::filesystem;
 using namespace cv;
-using std::vector, std::string, std::cout, std::thread;
+using std::vector, std::string, std::cout, std::cerr;
 
 int main(){
     while(1){
         vector<string> datanames = getFiles(DATAPATH);
         vector<ImageObject> DpObjects;
+
         DpObjects = assignObject(datanames);
-        cout << "Size: " << DpObjects.size() << std::endl;
         for(auto i : DpObjects){
-            cout << "Mode: " << i.getmode() << std::endl;
             displayImage(i);
-            waitKey(0);
+            pollKey();
+            sleep(PICDURATION);
         }
     }
     return 0;
@@ -52,8 +49,6 @@ vector<string> getFiles(string apath){
 }
 
 vector<ImageObject> assignObject(vector<string> names){
-    
-
     vector<ImageObject> objects;
     string tmpname;
     bool flag = true;
@@ -62,18 +57,21 @@ vector<ImageObject> assignObject(vector<string> names){
             tmpname = i;
             tmpname.erase(tmpname.end() - 4, tmpname.end());
             for(auto j : names){
-                if ((j.find(tmpname) != string::npos ) && (j.find(".txt") == string::npos)){ // if a file with the same name but different suffix is found
+                // if a file with the same name but different suffix is found
+                if ((j.find(tmpname) != string::npos ) && (j.find(".txt") == string::npos)){ 
                     ImageObject it{imgtxt, i, j};
                     objects.push_back(it);
                     break;
                 }
-                if (((j.find(tmpname) != string::npos) && (j.find(".txt") != string::npos))){ // if no file with the same name is found
+                // if no file with the same name is found
+                if (((j.find(tmpname) != string::npos) && (j.find(".txt") != string::npos))){ 
                     ImageObject jt{txt, i};
                     objects.push_back(jt);
                     break;
                 }
             }
         }
+        // if ".txt" is not found in filename
         if(i.find(".txt") == string::npos){ // if ".txt" is not found in filename
             tmpname = i;
             tmpname.erase((tmpname.begin() + tmpname.find_last_of('.')), tmpname.end());
@@ -146,23 +144,15 @@ Mat printTextOnImage(const vector<string> text, cv::Mat& image, int ystart){
     return image;
 
     //TODO: deal with too long lines, and too many lines
-
 }
-
-void sleepForMilliseconds(int milliseconds) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-}
-
 
 Mat insertLogo(Mat img, Mat logo){
     int xOffset = (SCREEN_WIDTH - logo.cols); // Calculate the position to center the image
     int yOffset = (SCREEN_HEIGHT - logo.rows);
     Mat roi = img(Rect(xOffset, yOffset, logo.cols, logo.rows)); // Copy the image onto the black background at the calculated position
     logo.copyTo(roi);
-    return img;
-    
+    return img;    
 }
-
 
 void displayImage(ImageObject obj){
     switch (obj.getmode()){
@@ -170,7 +160,7 @@ void displayImage(ImageObject obj){
         Mat image;
         image = imread(obj.getimgName(), IMREAD_COLOR );
         if (!image.data){
-            printf("No image data \n");
+            cerr << "Error: Could not read the image." << endl;
             return;
         }
         namedWindow("Image", WINDOW_AUTOSIZE);
@@ -184,15 +174,14 @@ void displayImage(ImageObject obj){
     case txt:{
         vector<string> text = readText(obj.gettxtName());
 
-
         Mat whiteBackground(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255));
 
         Mat logo;
-        logo = imread("logo.png", IMREAD_COLOR);
+        logo = imread("./set/logo.png", IMREAD_UNCHANGED);
         if (!logo.data){
             printf("No image data \n");
             return;
-        }
+        } 
         whiteBackground = insertLogo(whiteBackground, logo);
 
         whiteBackground = printTextOnImage(text, whiteBackground, 25);
@@ -222,8 +211,6 @@ void displayImage(ImageObject obj){
         image = printTextOnImage(text, image, (SCREEN_HEIGHT - (30 * text.size())));
 
         imshow("Image", image);
-
-
     }
     default:
         break;

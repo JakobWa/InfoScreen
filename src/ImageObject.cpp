@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "ImageObject.hpp"
+#include "../lib/ImageObject.hpp"
 
 ImObjMode ImageObject::getmode(){
     return mode;
