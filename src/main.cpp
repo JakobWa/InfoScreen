@@ -45,6 +45,7 @@ vector<string> getFiles(string apath){
     string path = apath;
     for (const auto & entry : fs::directory_iterator(path))
         files.push_back(entry.path());
+    std::sort(files.begin(), files.end());
     return files;
 }
 
@@ -194,7 +195,7 @@ void displayImage(ImageObject obj){
     case imgtxt:{
         vector<string> text = readText(obj.gettxtName());
         Mat image;
-        image = imread(obj.getimgName(), IMREAD_COLOR );
+        image = imread(obj.getimgName(), IMREAD_COLOR);
         if (!image.data){
             printf("No image data \n");
             return;
@@ -206,6 +207,13 @@ void displayImage(ImageObject obj){
             image = centerOnBlack(image);    
 
         Mat txtbkrd(30 * (text.size() + 1), SCREEN_WIDTH, CV_8UC3, Scalar(255, 255, 255)); //TODO: Make image transparent
+/*
+        Mat bgra[4];
+        split(txtbkrd,bgra);
+        rectangle(bgra[3],Rect(0, (SCREEN_HEIGHT - (30 * (text.size() + 1))), SCREEN_WIDTH, (30 * (text.size() + 1))),Scalar(127),-1);
+        bgra[3] = bgra[3] * 0.5; 
+        merge(bgra,4,txtbkrd);*/
+
         Mat roi = image(Rect(0, (SCREEN_HEIGHT - (30 * (text.size() + 1))), SCREEN_WIDTH, (30 * (text.size() + 1)))); //?
         txtbkrd.copyTo(roi);
         image = printTextOnImage(text, image, (SCREEN_HEIGHT - (30 * text.size())));
